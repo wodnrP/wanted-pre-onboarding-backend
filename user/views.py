@@ -20,6 +20,16 @@ class LoginException(APIException):
     default_detail = '아이디 혹은 비밀번호를 다시 확인해주세요'
     default_code = 'KeyNotFound'
 
+class EmailException(APIException):
+    status_code = 400
+    default_detail = '올바른 이메일 형식이 아닙니다. @를 입력해주세요.'
+    default_code = 'KeyNotFound'
+
+class PasswordException(APIException):
+    status_code = 400
+    default_detail = '비밀번호를 8자리 이상 입력해주세요'
+    default_code = 'KeyNotFound'
+
 class TokenErrorException(APIException):
     status_code = 403
     if status_code == 403:
@@ -44,6 +54,13 @@ def token_create(user):
 # 회원가입 API (회원가입시 즉시 로그인)
 class SignupAPIView(APIView):
     def post(self, request):
+        # email 유효성 검사 : @ 포함 
+        if "@" not in request.data['email']:
+            raise EmailException()
+        # password 유효성 검사 : 8자 이상
+        if len(request.data['password']) <= 8 :
+            raise PasswordException()
+        
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
@@ -62,9 +79,20 @@ class SignupAPIView(APIView):
 # 로그인 API
 class LoginAPIView(APIView):
     def post(self, request):
-        user = User.objects.filter(username=request.data['username']).first()
+        # email 유효성 검사 : @ 포함 
+        if "@" not in request.data['email']:
+            raise EmailException()
+        # password 유효성 검사 : 8자 이상
+        if len(request.data['password']) <= 8 :
+            raise PasswordException()
+        
+        user = User.objects.filter(email=request.data['email']).first()
+        
+        # 사용자의 회원 정보가 있는지 확인      
         if not user:
             raise LoginException()
+        
+        # 사용자의 패스워드가 존재하는지 확인
         if not user.check_password(request.data['password']):
             raise LoginException()
         

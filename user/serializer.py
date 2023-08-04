@@ -5,7 +5,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'profile', 'nickname')
+        fields = ('id', 'email', 'password', 'nickname')
 
     # 유저 password 암호화하여 DB저장
     def create(self, validated_data):
