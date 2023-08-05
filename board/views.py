@@ -9,69 +9,67 @@ import math
 # Create your views here.
 
 class BoardAPIView(APIView):
+    # 게시글 작성
+    def post(self, request):
+        serializer = BoardSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     def get(self, request):
-        paginator = PageNumberPagination()
-        paginator.page_size = 10
-        
-        items = request.GET.get('items', None)
         page = request.GET.get('page', None)
+        items = request.GET.get('items', None)
+        
+        paginator = PageNumberPagination()
+        # 1페이지 최대 items 수 = 10
+        paginator.page_size = 10
 
+        # defalt paeg = 1
         if page is None:
             page = 1
-
+        
+        # items가 null이 아닐 경우, items 값으로 page_size 초기화 
         if items is not None:
             paginator.page_size = int(items)
-
+        
+        # page 값 int로 타입 변환
         page = int(page)
-        board_object = Board.objects.all()
-        count = board_object.count()
-        page_data = count % paginator.page_size 
-
-        if count <= paginator.page_size:
-            total_page = 1
-
-        elif page_data == 0:
-            total_page = count / paginator.page_size
-
-        else:
-            total_page = count / paginator.page_size + 1
-        total_page = math.floor(total_page)
-        is_next = total_page - page > 0
-
-
-        board = board_object.order_by('create_time')
+        
+        board = Board.objects.filter().order_by('-create_time')
         result = paginator.paginate_queryset(board, request)
         
         try:
             serializer = BoardSerializer(result, many = True, context={"request": request})
-            result_serializer = serializer.data
-            
-            pagenation = {
-                "total_page" : total_page,
-                "current_page" : page,
-                "total_count" : count,
-                "is_next" : is_next,
-                "result" : result_serializer
-            }
-            
-            return Response(pagenation, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         
-        except board.DoesNotExist:
+        except Board.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
     
+
+class BoardDetailAPIView(APIView):
+    # 특정 게시글 조회 
     def get(self, request, board_id):
         try:
             board = Board.objects.get(pk = board_id)
             serializer = BoardSerializer(board, context={"request": request})
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except board.DoesNotExist:
+        except Board.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
     
+    # 특정 게시글 수정
     def patch(self, request, board_id):
-        pass
+        board = Board.objects.get(pk = board_id)
+        serializer = BoardSerializer(board, data=request.data, partial=True)
 
+        if serializer.is_valid():
+            serializer.save(data=request.data, request=request)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # 특정 게시글 삭제 
     def delete(self, request, board_id):
-        pass
+        board = Board.objects.get(pk = board_id)
+        board.delete()
+        return Response({'Message':'Success'}, status=status.HTTP_200_OK)
     
-    def post(self, request):
-        pass

@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import APIException
-from .authentication import create_access_token, create_refresh_token, decode_refresh_token, access_token_exp
+from .authentication import create_access_token, create_refresh_token, access_token_exp
 from .serializer import UserSerializer
 from .models import User
 
@@ -30,11 +30,6 @@ class PasswordException(APIException):
     default_detail = '비밀번호를 8자리 이상 입력해주세요'
     default_code = 'KeyNotFound'
 
-class TokenErrorException(APIException):
-    status_code = 403
-    if status_code == 403:
-        status_code = 401
-    default_detail = 'unauthenticated'
 
 # 로그인시 토큰 생성 함수
 def token_create(user):    
@@ -65,7 +60,7 @@ class SignupAPIView(APIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
 
-            user = User.objects.filter(username=request.data['email']).first()
+            user = User.objects.filter(email=request.data['email']).first()
             
             # 중복되는 유저가 있는지 확인
             if not user:
@@ -110,18 +105,4 @@ class LogoutAPIView(APIView):
         return response
 
 
-# refresh login
-class RefreshAPIView(APIView):
-    def post(self, request):
-        token = request.data['refresh_token']
-        
-        byt_token = bytes(token, 'utf-8')
-
-        id = decode_refresh_token(byt_token)
-        access_token = create_access_token(id)
-        access_exp = access_token_exp(access_token)
-        return Response({
-            'access_token': access_token,
-            'access_exp': access_exp
-        })
 

@@ -21,8 +21,8 @@ class SignupTest(TestCase):
         client = Client()
 
         signup_info = {
-            "username" : "signTestUser",
-            "password" : "test1234",
+            "email" : "signTestUser@test.com",
+            "password" : "test12346",
             "nickname" : "테스트사용자"
         }
         # json.dumps()로 객체를 json화 시켜줌
@@ -36,10 +36,10 @@ class LoginTest(TestCase):
     def setUp(self):
         self.url = reverse('login')
         self.user = User.objects.create(
-            username="loginTestUser",
+            email="loginTestUser@test.com",
             nickname="로그인테스트사용자"
         )
-        self.user.set_password("test0987")
+        self.user.set_password("test09876")
         self.user.save()
 
     def tearDown(self):
@@ -48,17 +48,17 @@ class LoginTest(TestCase):
     # 로그인 기능 테스트
     def test_login_post_sucess(self):
         login_info = {
-            "username" : "loginTestUser",
-            "password" : "test0987"
+            "email" : "loginTestUser@test.com",
+            "password" : "test09876"
         }
         response = self.client.post(self.url, data=login_info, format='json')
         self.assertEqual(response.status_code, 201)
     
-    # 로그인시 아이디가 틀렸을 경우 에러 테스트
+    # 로그인시 이메일이 틀렸을 경우 에러 테스트
     def test_login_post_invalid_username(self):
         login_info = {
-            "username" : "logTestUser",
-            "password" : "test0987"
+            "email" : "loginTest@test.com",
+            "password" : "test09876"
         }
         response = self.client.post(self.url, data=login_info, format='json')
         self.assertEqual(response.status_code, 400)
@@ -66,8 +66,8 @@ class LoginTest(TestCase):
     # 로그인시 비밀번호가 틀렸을 경우 에러 테스트
     def test_login_post_invalid_password(self):
         login_info = {
-            "username" : "loginTestUser",
-            "password" : "test1234"
+            "email" : "loginTestUser@test.com",
+            "password" : "test12345"
         }
         response = self.client.post(self.url, data=login_info, format='json')
         self.assertEqual(response.status_code, 400)
@@ -86,42 +86,4 @@ class LogoutTest(TestCase):
         self.assertEqual(response.cookies['refreshToken'].value, "")       # 쿠키에 refreshToken 값 확인 
 
 
-# refresh token API 테스트
-class RefreshLoginTest(TestCase):
-    def setUp(self):
-        self.client = APIClient(enforce_csrf_checks=True)
-        self.maxDiff = None
-        
-        self.user = User.objects.create(
-            id = 1,
-            username = "refreshTestUser",
-            nickname = "refresh테스트사용자",
-            profile = None
-        )
-        self.user.set_password('qwer1234')
-        self.user.save()
-
-    def tearDown(self):
-        User.objects.all().delete()
-
-    def test_refreshtoken(self):
-        login_user = {
-        "username" : "refreshTestUser",
-        "password" : "qwer1234",
-        }
-
-        # 사용자 로그인
-        login_response = self.client.post(reverse('login'), 
-        data=login_user, format='json')
-
-        # 사용자의 refresh_token
-        token = {
-            'refresh_token' : login_response.json()['refresh_token']
-        }
-        
-        response = self.client.post(
-            reverse('refresh'), json.dumps(token), content_type='application/json'
-            )
-
-        self.assertEqual(response.status_code, 200)
 
