@@ -2,20 +2,22 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.authentication import get_authorization_header
+from user.authentication import decode_access_token
 from .models import Board
 from .serializer import BoardSerializer
-from django.db.models import Count
-import math
 # Create your views here.
 
 class BoardAPIView(APIView):
     # 게시글 작성
     def post(self, request):
-        serializer = BoardSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        auth = get_authorization_header(request).split()
+        if auth and len(auth) == 2:
+            serializer = BoardSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request):
         page = request.GET.get('page', None)
@@ -59,17 +61,29 @@ class BoardDetailAPIView(APIView):
     
     # 특정 게시글 수정
     def patch(self, request, board_id):
-        board = Board.objects.get(pk = board_id)
-        serializer = BoardSerializer(board, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            serializer.save(data=request.data, request=request)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        auth = get_authorization_header(request).split()
+        if auth and len(auth) == 2:
+            board = Board.objects.get(pk = board_id)
+            # 해당 게시글 작성자인지 확인
+            if decode_access_token(auth[1]) == board.user_id:
+                serializer = BoardSerializer(board, data=request.data, partial=True)
+                
+                if serializer.is_valid():
+                    serializer.save(data=request.data, request=request)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            else:
+                return Response({'Message':'해당 게시글 작성자가 아닙니다.'}, status=status.HTTP_401_UNAUTHORIZED)
 
     # 특정 게시글 삭제 
     def delete(self, request, board_id):
-        board = Board.objects.get(pk = board_id)
-        board.delete()
-        return Response({'Message':'Success'}, status=status.HTTP_200_OK)
+        auth = get_authorization_header(request).split()
+        if auth and len(auth) == 2:
+            board = Board.objects.get(pk = board_id)
+            if decode_access_token(auth[1]) == board.user_id:
+                board.delete()
+                return Response({'Message':'Success'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'Message':'해당 게시글 작성자가 아닙니다.'}, status=status.HTTP_401_UNAUTHORIZED)
     

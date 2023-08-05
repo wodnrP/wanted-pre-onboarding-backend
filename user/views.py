@@ -30,7 +30,6 @@ class PasswordException(APIException):
     default_detail = '비밀번호를 8자리 이상 입력해주세요'
     default_code = 'KeyNotFound'
 
-
 # 로그인시 토큰 생성 함수
 def token_create(user):    
     access_token = create_access_token(user.id)
