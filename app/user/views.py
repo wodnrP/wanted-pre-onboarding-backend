@@ -92,16 +92,6 @@ class LoginAPIView(APIView):
         
         return token_create(user)
 
-# 로그아웃 API
-class LogoutAPIView(APIView):
-    
-    def delete(self, _):
-        response = Response()
-        response.delete_cookie(key="refreshToken")
-        response.data = {
-            'Message' : 'Logout success'
-        }
-        return response
 
 
 

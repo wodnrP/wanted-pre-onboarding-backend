@@ -72,18 +72,7 @@ class LoginTest(TestCase):
         response = self.client.post(self.url, data=login_info, format='json')
         self.assertEqual(response.status_code, 400)
 
-# 로그아웃 테스트 케이스
-class LogoutTest(TestCase):
-    """
-    1. json massage, status=200이 정상적으로 반환되는지 테스트
-    2. 리프레시 토큰이 쿠키에서 삭제되었는지 테스트
-    """ 
-    def test_logout_delete_success(self):
-        response = self.client.delete(reverse('logout'), format='json')
 
-        self.assertEqual(response.json(), {'Message' : 'Logout success'} ) # json 메시지 확인
-        self.assertEqual(response.status_code, 200)                        # status code 200 확인
-        self.assertEqual(response.cookies['refreshToken'].value, "")       # 쿠키에 refreshToken 값 확인 
 
 
 

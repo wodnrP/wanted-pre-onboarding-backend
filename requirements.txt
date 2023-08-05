@@ -4,6 +4,7 @@ django-environ==0.10.0
 djangorestframework==3.14.0
 djangorestframework-jwt==1.11.0
 inflection==0.5.1
+mysqlclient==2.2.0
 packaging==23.1
 Pillow==9.5.0
 PyJWT==1.7.1
