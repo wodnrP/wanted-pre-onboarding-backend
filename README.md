@@ -5,9 +5,9 @@
 ---
 
 ### 📌 실행 방법
-#### 기본 환경 셋팅
+#### 💻 기본 환경 셋팅
 - python3.9X 설치
-- (Mac 기준) brew 설치 및
+- (Mac 기준) brew 설치 및 업데이트
   ```
   $ brew update
   ```
@@ -67,7 +67,7 @@
   mysql> GRANT ALL PRIVILEGES ON 적용할 DB이름 TO 'newuser'@'localhost' WITH GRANT OPTION;
   mysql> FLUSH PRIVILEGES;
   ```
-- Docker-compose.yml과 같은 위치에 .env 파일 생성
+- ⭐️ Docker-compose.yml과 같은 위치에 .env 파일 생성
   ```
   # .env
   # docker compose db password
@@ -75,17 +75,17 @@
   MYSQL_HOST=localhost               // local server
   MYSQL_USER=wantedAdmin             // 생성한 사용자
   MYSQL_PASSWORD=Parkjaeouk7#        // 생성한 사용자 비밀번호
-  MYSQL_ROOT_PASSWORD=parkjaeouk7!   // root 계정 비밀번호
+  MYSQL_ROOT_PASSWORD=************   // root 계정 비밀번호
   ```
-- app 디렉토리 내부에 .env 파일 생성
+- ⭐️ app 디렉토리 내부에 .env 파일 생성
   - https://djecrety.ir/ 에서 django secret_key 생성 후 .env file에 적용   
   ```
   DEBUG=true or false
   SECRET_KEY=...
   ```
-- config (project 디렉토리) 폴더 안, settings.py와 같은 위치에 my_settings.py 생성
+- ⭐️ config (project 디렉토리) 폴더 안, settings.py와 같은 위치에 my_settings.py 생성
   ```
-  # my_settings.py
+  # my_settings.py ex)
   DATABASES = {
       'default' : {
           'ENGINE': 'django.db.backends.mysql',    
@@ -102,11 +102,27 @@
   python3 manage.py makemigrations
   python3 manage.py migrate
   ```
-  #### 실행
+
+#### ⚙️ 실행
 - docker-compose 실행
   ```
   docker-compose up -d —build
   ```
+  > 127.0.0.1:8000/users/signup 회원가입
+  >
+  > 127.0.0.1:8000/users/login 로그인
+  >
+  > 127.0.0.1:8000/boards 전체 게시글
+  >
+  > 127.0.0.1:8000/boards?page=1&items=5 페이지네이션 (1페이지당 5개 객체 호출을 의미)
+  >
+  > 127.0.0.1:8000/boards/ 게시글 작성
+  >
+  > 127.0.0.1:8000/boards/1 게시글 ID 1번인 게시글 조회, 수정, 삭제
+
+
+
+  ⭐️ **ERROR 처리 [필수]**
 - ⚠️ 다음과 같은 에러 발생
   ```
   django.db.utils.OperationalError: (2002, "Can't connect to MySQL server on 'mysql' (115)")
@@ -120,12 +136,24 @@
   - 다시 my_settings.py ‘HOST’:’mysql’로 수정 후 ```docker-compose up -d —build```
   - **127.0.0.1:8000/boards 접속으로 정상 작동 확인**
  
+
 - ⚠️ 두번째 회원의 회원가입 API 작동 시 (1062, "Duplicate entry '' for key 'user_user.username'") 발생할 경우
   - docker-compose 컨테이너 내부에 admin 계정 생성
     ```
     docker-compose exec web python manage.py createsuperuser
     ```
-  - **127.0.0.1:8000/admin**으로 접속하여 User 페이지에서 이미 생성된 회원들의 username을 각각 다르게 수정 후 다시 회원가입 진행 가능 
+  - **127.0.0.1:8000/admin**으로 접속하여 User 페이지에서 이미 생성된 회원들의 username을 각각 다르게 수정 후 다시 회원가입 진행 가능
+
+- #### ⚙️ UNITEST CODE RUN
+  ```
+  $ docker-compose exec web python manage.py test
+  ```
+
+  - **BUT**  test_database 권한이 필요 : 테스트 DB에 대한 모든 권한 부여
+    - GRANT ALL PRIVILEGES ON test_DB 이름.* TO 'DB 사용자'@'%'; (아래 예시) 
+  ```
+  mysql> GRANT ALL PRIVILEGES ON test_wanteddb.* TO 'wantedAdmin'@'%';
+  ```
 
 - ### 📂 (참고) 셋팅된 디렉토리 구조
   > #### root 디렉토리
@@ -144,7 +172,8 @@
   > - requirements.txt
   > - .gitignore
   > - README.md
-  > - .env (docker-compose db env) 
+  > - .env (docker-compose db env)
+  
 ---
 
 ### 🖨️ 데이터베이스 테이블 구조 [ERD]
