@@ -6,16 +6,22 @@ WORKDIR /app
 
 COPY requirements.txt /app/
 COPY . /app/
-# expose port
-EXPOSE 8000
+
+ENV PATH /py/bin:$PATH
 
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
     /py/bin/pip install -r requirements.txt && \
     rm -rf /tmp
 
-# set environment variables
-ENV PATH /py/bin:$PATH
+COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 
-RUN python manage.py collectstatic --noinput
-CMD ["python", "manage.py", "runserver", "0:8000"]
+# expose port
+EXPOSE 8000
+
+# set environment variables
+# ENV PYTHONUNBUFFERD 1
+# RUN python manage.py collectstatic --noinput
+# CMD python manage.py runserver 0.0.0.0:8000

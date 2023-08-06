@@ -9,6 +9,7 @@ class Board(models.Model):
     update_time = models.DateTimeField(null=True, auto_now=True)
     user = models.ForeignKey("user.User", related_name='+', on_delete=models.CASCADE, blank=True, null=True)
 
+    
     def __str__(self):
         return self.title
     

@@ -19,6 +19,8 @@ services:
     volumes:
       - ./db/data:/var/lib/mysql
       - ./db/conf.d:/etc/mysql/conf.d
+    networks:
+      - mynetwork
     healthcheck:
       test: ["CMD-SHELL", "ping", "-h", "localhost"]
       interval: 30s
@@ -28,8 +30,12 @@ services:
   web:
     build: 
       context: .
+      dockerfile: Dockerfile
+    command: python manage.py migrate && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000 
     expose:
       - "8000"
+    ports:
+      - "8000:8000"
     restart: always
     volumes:
       - ./app:/app
@@ -38,6 +44,11 @@ services:
       - mysql:mysql
     depends_on:
       - mysql
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
 
 volumes:
   static_volume:
