@@ -50,11 +50,11 @@
   $ mysql -u root -p
   ```
 - DB 생성
-  ```
+  ```sql
   mysql> CREATE DATABASE DB이름 CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
   ```
 - 헤당 DB 적용 후 show tables로 확인 
-  ```
+  ```sql
   mysql> use DB이름;
   Database changed
 
@@ -62,7 +62,7 @@
   Empty set (0.00 sec)
   ```
 - DB 사용자 생성 후 권한 부여
-  ```
+  ```sql
   mysql> CREATE USER 'newuser'@'localhost' IDENTIFIED BY 'password';
   mysql> GRANT ALL PRIVILEGES ON 적용할 DB이름 TO 'newuser'@'localhost' WITH GRANT OPTION;
   mysql> FLUSH PRIVILEGES;
@@ -84,7 +84,7 @@
   SECRET_KEY=...
   ```
 - ⭐️ config (project 디렉토리) 폴더 안, settings.py와 같은 위치에 my_settings.py 생성
-  ```
+  ```python
   # my_settings.py ex)
   DATABASES = {
       'default' : {
@@ -151,7 +151,7 @@
 
   - **BUT**  test_database 권한이 필요 : 테스트 DB에 대한 모든 권한 부여
     - GRANT ALL PRIVILEGES ON test_DB 이름.* TO 'DB 사용자'@'%'; (아래 예시) 
-  ```
+  ```sql
   mysql> GRANT ALL PRIVILEGES ON test_wanteddb.* TO 'wantedAdmin'@'%';
   ```
 
