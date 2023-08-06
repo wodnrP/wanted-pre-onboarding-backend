@@ -14,7 +14,7 @@
 ---
 
 ### 🖥️ API 동작 데모 영상
-
+[API 동작 데모 영상 링크 : docker-compose local server postman 동작](https://drive.google.com/file/d/1c9l6MqxHXVfoUZ1I5adGdPsa6Q6rC9VG/view?usp=drive_link)
 ---
 
 ### ❓ 구현 방법 및 이유
